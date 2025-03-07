@@ -7,69 +7,104 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Category{
+enum Category {
   IMAGE
   LINK
   TEXT
   ZIP
 }
 
+enum AppointmentType {
+  CONSULTATION
+  THERAPY
+  MEETING
+  CHECKUP
+  OTHER
+}
 
-model User{
-  id String @id @default(uuid()) @db.Uuid
-  name String
-  email String @unique
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+  COMPLETED
+}
+
+enum ForumSection {
+  ARTICLE
+  SELFHELP
+  EDUCATIONAL
+}
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String
+  email         String    @unique
   password_hash String
-  createAt DateTime @default(now())
-  role String @default("user")
+  createdAt     DateTime  @default(now()) @map("createAt")
+  role          String    @default("user")
 
-  moods Mood[] @relation("UserMoods")
-  posts Forum_post[] @relation("UserPosts")
+  moods         Mood[]              @relation("UserMoods")
+  posts         ForumPost[]         @relation("UserPosts")
+  appointments  Appointment[]       @relation("UserAppointments")
+  likes         ForumLike[]         @relation("UserLikes")
+  comments      ForumComment[]      @relation("UserComments")
 }
 
-model Mood{
-  id String @id @default(uuid()) @db.Uuid
+model Mood {
+  id        String   @id @default(uuid()) @db.Uuid
   moodScore Int
-  moodDate DateTime @default(now())
-  notes String
-  userId String
+  moodDate  DateTime @default(now())
+  notes     String
+  userId    String   @db.Uuid
 
-  user User @relation("UserMoods", fields: [userId] , references: [id])
+  user      User     @relation("UserMoods", fields: [userId], references: [id])
 }
 
-model Forum_post{
-  id String @id @default(uuid()) @db.Uuid
-  userId String
-  title String
-  catagory Category
-  timestamp DateTime @default(now())
-  text String
-  fileDest String?
+model ForumPost {
+  id          String      @id @default(uuid()) @db.Uuid
+  userId      String      @db.Uuid
+  title       String
+  category    Category
+  timestamp   DateTime    @default(now())
+  text        String
+  fileDest    String?
 
-  likes Forum_like[] @relation("UserLikes")
-  comments Forum_comment[] @relation("UserComments")
+  likes       ForumLike[]    @relation("PostLikes")
+  comments    ForumComment[] @relation("PostComments")
 
-  user User @relation("UserPosts", fields: [userId], references: [id])
+  user        User           @relation("UserPosts", fields: [userId], references: [id])
 }
 
-model Forum_like{
-  id String @id @default(uuid()) @db.Uuid
-  userId String
-  timestamp DateTime @default(now())
+model ForumLike {
+  id         String     @id @default(uuid()) @db.Uuid
+  userId     String     @db.Uuid
+  postId     String     @db.Uuid
+  timestamp  DateTime   @default(now())
 
-  user Forum_post @relation("UserLikes",fields: [userId],references: [id])
+  user       User       @relation("UserLikes", fields: [userId], references: [id])
+  post       ForumPost  @relation("PostLikes", fields: [postId], references: [id])
 }
 
-model Forum_comment{
-  id String @id @default(uuid()) @db.Uuid
-  userId String
-  timeStamp DateTime @default(now())
-  text String
+model ForumComment {
+  id         String     @id @default(uuid()) @db.Uuid
+  userId     String     @db.Uuid
+  postId     String     @db.Uuid
+  timestamp  DateTime   @default(now())
+  text       String
 
-  user Forum_post @relation("UserComments",fields: [userId],references: [id])
+  user       User       @relation("UserComments", fields: [userId], references: [id])
+  post       ForumPost  @relation("PostComments", fields: [postId], references: [id])
 }
 
+model Appointment {
+  id                  String           @id @default(uuid()) @db.Uuid
+  userId              String           @db.Uuid
+  timestamp           DateTime         @default(now())
+  description         String
+  appointment_time    DateTime
+  appointment_type    AppointmentType
+  appointment_status  AppointmentStatus
+  appointment_with    String
 
-model Appointments{
-  id String @id @default(uuid()) @db.Uuid
+  user                User             @relation("UserAppointments", fields: [userId], references: [id])
 }
