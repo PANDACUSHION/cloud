@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Category{
+  IMAGE
+  LINK
+  TEXT
+  ZIP
+}
+
+
+model User{
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  email String @unique
+  password_hash String
+  createAt DateTime @default(now())
+  role String @default("user")
+
+  moods Mood[] @relation("UserMoods")
+  posts Forum_post[] @relation("UserPosts")
+}
+
+model Mood{
+  id String @id @default(uuid()) @db.Uuid
+  moodScore Int
+  moodDate DateTime @default(now())
+  notes String
+  userId String
+
+  user User @relation("UserMoods", fields: [userId] , references: [id])
+}
+
+model Forum_post{
+  id String @id @default(uuid()) @db.Uuid
+  userId String
+  title String
+  catagory Category
+  timestamp DateTime @default(now())
+  text String
+  fileDest String?
+
+  likes Forum_like[] @relation("UserLikes")
+  comments Forum_comment[] @relation("UserComments")
+
+  user User @relation("UserPosts", fields: [userId], references: [id])
+}
+
+model Forum_like{
+  id String @id @default(uuid()) @db.Uuid
+  userId String
+  timestamp DateTime @default(now())
+
+  user Forum_post @relation("UserLikes",fields: [userId],references: [id])
+}
+
+model Forum_comment{
+  id String @id @default(uuid()) @db.Uuid
+  userId String
+  timeStamp DateTime @default(now())
+  text String
+
+  user Forum_post @relation("UserComments",fields: [userId],references: [id])
+}
+
+
+model Appointments{
+  id String @id @default(uuid()) @db.Uuid
+}
