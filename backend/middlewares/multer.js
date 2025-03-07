@@ -5,7 +5,7 @@ const randomString = require('../utils/randomizer'); // Import the random string
 // Set up storage for multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // The folder to save uploaded images
+        cb(null, 'uploads/'); // The folder to save uploaded files
     },
     filename: (req, file, cb) => {
         const uniqueString = randomString(10); // Generate a random string
@@ -15,13 +15,13 @@ const storage = multer.diskStorage({
     }
 });
 
-// File filter (optional, for restricting file types)
+// File filter (for restricting file types)
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf', 'application/zip'];
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true); // Accept the file
     } else {
-        cb(new Error('Invalid file type'), false); // Reject the file
+        cb(new Error('Invalid file type. Allowed types are: image, pdf, zip'), false); // Reject the file
     }
 };
 
@@ -29,7 +29,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // Optional: Limit file size (5MB)
+    limits: { fileSize: 10 * 1024 * 1024 } // Optional: Limit file size (10MB)
 });
 
 module.exports = upload;
