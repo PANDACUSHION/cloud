@@ -3,21 +3,27 @@ const prisma = new PrismaClient();
 const { authenticate, authorizeAdmin } = require('../middlewares/auth');
 const {sign} = require("jsonwebtoken");
 const {compare} = require("bcrypt");
+const bcrypt = require("bcrypt");
 
-// Create User
 const createUser = async (req, res) => {
     try {
-        const { name, email, password_hash, role } = req.body;
+        const { name, email, password, role } = req.body;
 
-        // Check if user is an admin
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: "Access denied, admin only" });
+        let password_hash = bcrypt.hashSync(password, 12);
+        // Check if user already exists
+        const existingUser = await prisma.user.findUnique({
+            where: { email },
+        });
+        if (existingUser) {
+            return res.status(400).json({ error: 'User with this email already exists' });
         }
 
+        // Create a new user
         const user = await prisma.user.create({
-            data: { name, email, password_hash, role }
+            data: { name, email, password_hash, role },
         });
-        res.status(201).json(user);
+
+        res.status(201).json(user); // Respond with created user
     } catch (error) {
         res.status(500).json({ error: 'Failed to create user', details: error.message });
     }

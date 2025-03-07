@@ -16,8 +16,7 @@ const { authenticate, authorizeAdmin } = require('../middlewares/auth');
 
 const router = express.Router();
 
-// Route to create a user (admin only)
-router.post('/user', authenticate, authorizeAdmin, createUser);
+router.post('/user', createUser);
 
 // Route to get all users (admin only)
 router.get('/users', authenticate, authorizeAdmin, getUsers);

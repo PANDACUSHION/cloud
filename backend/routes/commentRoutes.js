@@ -5,10 +5,10 @@ const { authenticate } = require('../middlewares/auth');
 const router = express.Router();
 
 // Route to create a comment for a specific post
-router.post('/comment', createComment);
+router.post('/comment',authenticate, createComment);
 
 // Route to remove a comment from a specific post
-router.delete('/comment', removeComment);
+router.delete('/comment',authenticate, removeComment);
 
 // Route to get all comments for a specific post
 router.get('/post/:postId/comments', getPostComments);
