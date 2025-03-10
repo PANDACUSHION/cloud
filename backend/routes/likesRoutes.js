@@ -1,6 +1,6 @@
 const express = require('express');
 const { createLike,  getPostLikes,getLikedPostsByUser } = require('../controllers/likesController');
-const { authenticate } = require('../middlewares/auth'); // Import authentication middleware
+const { authenticate } = require('../middlewares/auth');
 
 const router = express.Router();
 
