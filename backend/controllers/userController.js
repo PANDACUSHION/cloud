@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const { authenticate, authorizeAdmin } = require('../middlewares/auth');
-const {sign} = require("jsonwebtoken");
+const {sign, decode} = require("jsonwebtoken");
 const {compare} = require("bcrypt");
 const bcrypt = require("bcrypt");
 
@@ -23,7 +23,7 @@ const createUser = async (req, res) => {
             data: { name, email, password_hash, role },
         });
 
-        res.status(201).json(user); // Respond with created user
+        res.status(201).json(user);
     } catch (error) {
         res.status(500).json({ error: 'Failed to create user', details: error.message });
     }
@@ -132,11 +132,11 @@ const validateUser = async (req, res) => {
 
         // Generate JWT token
         const token = sign(
-            { id: user.id, role: user.role, email: user.email },
-            process.env.JWT_SECRET, // Make sure to have a JWT secret in your environment variables
-            { expiresIn: '1h' } // Set token expiration time as needed
+            { id: user.id, role: user.role, email: user.email, username: user.name },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
         );
-
+        console.log(decode(token));
         res.status(200).json({ message: "Login successful", token });
     } catch (error) {
         res.status(500).json({ error: 'Failed to validate user', details: error.message });

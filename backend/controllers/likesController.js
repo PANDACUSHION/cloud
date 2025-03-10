@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Create a like for a forum post
+// Create or remove a like for a forum post (toggle behavior)
 const createLike = async (req, res) => {
     const { userId, postId } = req.body;
 
@@ -16,11 +16,18 @@ const createLike = async (req, res) => {
             },
         });
 
+        // If like already exists, remove it
         if (existingLike) {
-            return res.status(400).json({ error: 'User has already liked this post.' });
+            await prisma.forumLike.delete({
+                where: {
+                    id: existingLike.id,
+                },
+            });
+
+            return res.status(200).json({ message: 'Like removed successfully.' });
         }
 
-        // Create the like
+        // If like does not exist, create the like
         const like = await prisma.forumLike.create({
             data: {
                 userId,
@@ -31,40 +38,7 @@ const createLike = async (req, res) => {
         return res.status(201).json(like);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: 'Something went wrong while creating like.' });
-    }
-};
-
-// Remove a like for a forum post
-const removeLike = async (req, res) => {
-    const { userId, postId } = req.body;
-
-    try {
-        // Find the like
-        const like = await prisma.forumLike.findUnique({
-            where: {
-                userId_postId: {
-                    userId,
-                    postId,
-                },
-            },
-        });
-
-        if (!like) {
-            return res.status(404).json({ error: 'Like not found.' });
-        }
-
-        // Remove the like
-        await prisma.forumLike.delete({
-            where: {
-                id: like.id,
-            },
-        });
-
-        return res.status(200).json({ message: 'Like removed successfully.' });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Something went wrong while removing like.' });
+        return res.status(500).json({ error: 'Something went wrong while processing like.' });
     }
 };
 
@@ -88,5 +62,29 @@ const getPostLikes = async (req, res) => {
         return res.status(500).json({ error: 'Something went wrong while fetching likes.' });
     }
 };
+const getLikedPostsByUser = async (req, res) => {
+    const { userId } = req.params;
 
-module.exports = { createLike, removeLike, getPostLikes };
+    try {
+        // Fetch all posts where the user has liked
+        const likedPosts = await prisma.forumLike.findMany({
+            where: {
+                userId, // Filter by userId
+            },
+            include: {
+                post: true, // Include the post details
+            },
+        });
+
+        // Extract only the post data from the likes
+        const posts = likedPosts.map(like => like.post);
+
+        return res.status(200).json(posts); // Return the posts liked by the user
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Something went wrong while fetching liked posts.' });
+    }
+};
+
+
+module.exports = { createLike, getPostLikes ,getLikedPostsByUser};

@@ -1,8 +1,13 @@
 // src/context/AuthContext.jsx
 import React, { createContext, useContext, useState } from 'react';
-import { jwtDecode } from 'jwt-decode'; // Changed to named import
+import { jwtDecode } from 'jwt-decode';
 
-const AuthContext = createContext(undefined);
+// Create context with a meaningful default value
+const AuthContext = createContext({
+    user: null,
+    login: () => {},
+    logout: () => {}
+});
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => {

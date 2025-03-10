@@ -1,13 +1,13 @@
 const express = require('express');
 const cors = require('cors');
-const { authenticate, authorizeAdmin } = require('./middlewares/auth');
+const { join } = require('path'); // Import the join function from the path module
 
 // Import route files
 const userRoutes = require('./routes/userRoutes');
 const forumPostRoutes = require('./routes/forumRoutes');
 const moodRoutes = require('./routes/moodRoutes');
 const likeRoutes = require('./routes/likesRoutes');
-
+const commentRoutes = require('./routes/commentRoutes');
 // Initialize Express app
 const app = express();
 
@@ -25,6 +25,20 @@ app.use('/api/users', userRoutes); // User routes
 app.use('/api/forum', forumPostRoutes); // Forum post routes
 app.use('/api/moods', moodRoutes); // Mood routes
 app.use('/api/likes', likeRoutes); // Like routes
+app.use('/api/comments', commentRoutes);
+// File download route
+app.get('/api/download/uploads/:filename', (req, res) => {
+    const { filename } = req.params;
+    const filePath = join(__dirname, 'uploads', filename);
+
+    // Send file for download
+    res.download(filePath, filename, (err) => {
+        if (err) {
+            console.error("File download error:", err);
+            res.status(500).send('Error downloading file');
+        }
+    });
+});
 
 // Error handling for unknown routes
 app.use((req, res, next) => {

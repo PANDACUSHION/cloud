@@ -1,17 +1,11 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const upload = require('../middlewares/multer'); // Import multer middleware
-const { authenticate } = require('../middlewares/auth'); // Import authentication middleware
-
 // Create a ForumPost
 const createForumPost = async (req, res) => {
     const { title, category, text, userId } = req.body;
 
     try {
-        // Ensure the user has access to create a post (admin or the user themselves)
-        if (req.user.id !== userId && req.user.role !== 'admin') {
-            return res.status(403).json({ message: "Access denied" });
-        }
 
         let fileDest = null;
 
@@ -43,6 +37,7 @@ const createForumPost = async (req, res) => {
 
 // Get all Forum Posts
 const getForumPosts = async (req, res) => {
+    console.log("am here");
     try {
         const posts = await prisma.forumPost.findMany();
         res.status(200).json(posts);

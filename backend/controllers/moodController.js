@@ -28,7 +28,6 @@ const createMood = async (req, res) => {
 // Get all Moods for a specific User
 const getUserMoods = async (req, res) => {
     const { userId } = req.params;
-
     try {
         // Check if the user has access to view moods (either admin or the user themselves)
         if (req.user.id !== userId && req.user.role !== 'admin') {
@@ -38,9 +37,9 @@ const getUserMoods = async (req, res) => {
         const moods = await prisma.mood.findMany({
             where: { userId }
         });
-
+        console.log(moods);
         if (moods.length === 0) {
-            return res.status(404).json({ message: "No moods found for this user" });
+            return res.status(200).json([]);
         }
 
         res.status(200).json(moods);

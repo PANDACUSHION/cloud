@@ -36,18 +36,20 @@ enum ForumSection {
 }
 
 model User {
-  id            String    @id @default(uuid()) @db.Uuid
+  id            String   @id @default(uuid()) @db.Uuid
   name          String
-  email         String    @unique
+  email         String   @unique
   password_hash String
-  createdAt     DateTime  @default(now()) @map("createAt")
-  role          String    @default("user")
+  createdAt     DateTime @default(now()) @map("createAt")
+  role          String   @default("user")
 
-  moods         Mood[]              @relation("UserMoods")
-  posts         ForumPost[]         @relation("UserPosts")
-  appointments  Appointment[]       @relation("UserAppointments")
-  likes         ForumLike[]         @relation("UserLikes")
-  comments      ForumComment[]      @relation("UserComments")
+  moods        Mood[]         @relation("UserMoods")
+  posts        ForumPost[]    @relation("UserPosts")
+  appointments Appointment[]  @relation("UserAppointments")
+  likes        ForumLike[]    @relation("UserLikes")
+  comments     ForumComment[] @relation("UserComments")
+
+  @@index([email])
 }
 
 model Mood {
@@ -57,54 +59,68 @@ model Mood {
   notes     String
   userId    String   @db.Uuid
 
-  user      User     @relation("UserMoods", fields: [userId], references: [id])
+  user User @relation("UserMoods", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model ForumPost {
-  id          String      @id @default(uuid()) @db.Uuid
-  userId      String      @db.Uuid
-  title       String
-  category    Category
-  timestamp   DateTime    @default(now())
-  text        String
-  fileDest    String?
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  title     String
+  category  Category
+  timestamp DateTime @default(now())
+  text      String
+  fileDest  String?
 
-  likes       ForumLike[]    @relation("PostLikes")
-  comments    ForumComment[] @relation("PostComments")
+  likes    ForumLike[]    @relation("PostLikes")
+  comments ForumComment[] @relation("PostComments")
 
-  user        User           @relation("UserPosts", fields: [userId], references: [id])
+  user User @relation("UserPosts", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model ForumLike {
-  id         String     @id @default(uuid()) @db.Uuid
-  userId     String     @db.Uuid
-  postId     String     @db.Uuid
-  timestamp  DateTime   @default(now())
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  postId    String   @db.Uuid
+  timestamp DateTime @default(now())
 
-  user       User       @relation("UserLikes", fields: [userId], references: [id])
-  post       ForumPost  @relation("PostLikes", fields: [postId], references: [id])
+  user User      @relation("UserLikes", fields: [userId], references: [id], onDelete: Cascade)
+  post ForumPost @relation("PostLikes", fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
 }
 
 model ForumComment {
-  id         String     @id @default(uuid()) @db.Uuid
-  userId     String     @db.Uuid
-  postId     String     @db.Uuid
-  timestamp  DateTime   @default(now())
-  text       String
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  postId    String   @db.Uuid
+  timestamp DateTime @default(now())
+  text      String
 
-  user       User       @relation("UserComments", fields: [userId], references: [id])
-  post       ForumPost  @relation("PostComments", fields: [postId], references: [id])
+  user User      @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
+  post ForumPost @relation("PostComments", fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([postId])
 }
 
 model Appointment {
-  id                  String           @id @default(uuid()) @db.Uuid
-  userId              String           @db.Uuid
-  timestamp           DateTime         @default(now())
-  description         String
-  appointment_time    DateTime
-  appointment_type    AppointmentType
-  appointment_status  AppointmentStatus
-  appointment_with    String
+  id                 String            @id @default(uuid()) @db.Uuid
+  userId             String            @db.Uuid
+  timestamp          DateTime          @default(now())
+  description        String
+  appointment_time   DateTime
+  appointment_type   AppointmentType
+  appointment_status AppointmentStatus
+  appointment_with   String
 
-  user                User             @relation("UserAppointments", fields: [userId], references: [id])
+  user User @relation("UserAppointments", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([appointment_time])
 }
