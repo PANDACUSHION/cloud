@@ -1,6 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const upload = require('../middlewares/multer'); // Import multer middleware
+
 // Create a ForumPost
 const createForumPost = async (req, res) => {
     const { title, category, text, userId } = req.body;
@@ -41,8 +41,25 @@ const getForumPosts = async (req, res) => {
     try {
         const posts = await prisma.forumPost.findMany();
         res.status(200).json(posts);
+        console.log(posts);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch forum posts', details: error.message });
+    }
+};
+
+const getResources = async (req, res) => {
+    try {
+        const resources = await prisma.forumPost.findMany({
+            where: {
+                category: {
+                    not: 'TEXT' // Filter directly in the database query
+                }
+            }
+        });
+        res.status(200).json(resources);
+        console.log(resources);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch resources', details: error.message });
     }
 };
 
@@ -63,9 +80,34 @@ const getForumPostById = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch forum post', details: error.message });
     }
 };
+// Delete a forum post by ID
+const deleteForumPost = async (req, res) => {
+    const { postId } = req.params;
+    console.log(postId);
+    try {
+        const post = await prisma.forumPost.findUnique({
+            where: { id: postId },
+        });
+
+        if (!post) {
+            return res.status(404).json({ message: 'Resource not found' });
+        }
+
+        // Delete the post from the database
+        await prisma.forumPost.delete({
+            where: { id: postId },
+        });
+
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete resource', details: error.message });
+    }
+};
+
 
 module.exports = {
     createForumPost,
     getForumPosts,
-    getForumPostById
+    getForumPostById,
+    getResources,
+    deleteForumPost
 };

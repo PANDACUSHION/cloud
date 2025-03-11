@@ -1,5 +1,5 @@
 const express = require('express');
-const { createForumPost, getForumPosts, getForumPostById } = require('../controllers/forumController');
+const { createForumPost, getForumPosts, getForumPostById , getResources ,deleteForumPost} = require('../controllers/forumController');
 const { authenticate, authorizeAdmin } = require('../middlewares/auth');
 const upload = require('../middlewares/multer'); // Multer middleware for file uploads
 
@@ -13,5 +13,9 @@ router.get('/forum/posts', getForumPosts);
 
 // Route to get a specific forum post by ID (no authentication required)
 router.get('/forum/post/:postId', getForumPostById);
+
+router.get('/forum/resources', getResources);
+
+router.delete('/forum/post/:postId', authenticate, authorizeAdmin, deleteForumPost);
 
 module.exports = router;

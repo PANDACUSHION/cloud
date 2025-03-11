@@ -41,6 +41,7 @@ const Navbar = () => {
                                 </a>
                                 <a href="/form" className="px-3 py-2 rounded-md hover:bg-gray-700">Forums</a>
                                 <a href="/resources" className="px-3 py-2 rounded-md hover:bg-gray-700">Resources</a>
+                                <a href="/appointment" className="px-3 py-2 rounded-md hover:bg-gray-700">Appointments</a>
                                 <button
                                     onClick={logout}
                                     className="px-3 py-2 rounded-md hover:bg-gray-700"
@@ -53,10 +54,10 @@ const Navbar = () => {
                         {/* Admin User Navigation Links */}
                         {userType === "admin" && (
                             <div className="flex space-x-4">
-                                <a href="/dashboard" className="px-3 py-2 rounded-md hover:bg-gray-700">Dashboard</a>
-                                <a href="/admin/users" className="px-3 py-2 rounded-md hover:bg-gray-700">Users</a>
-                                <a href="/admin/analytics" className="px-3 py-2 rounded-md hover:bg-gray-700">Analytics</a>
-                                <a href="/settings" className="px-3 py-2 rounded-md hover:bg-gray-700">Settings</a>
+                                <a href="/users" className="px-3 py-2 rounded-md hover:bg-gray-700">Users</a>
+                                <a href="/analytics" className="px-3 py-2 rounded-md hover:bg-gray-700">Analytics</a>
+                                <a href="/form" className="px-3 py-2 rounded-md hover:bg-gray-700">Forums</a>
+                                <a href="/appointments" className="px-3 py-2 rounded-md hover:bg-gray-700">Appointments</a>
                                 <button
                                     onClick={logout}
                                     className="px-3 py-2 rounded-md hover:bg-gray-700"

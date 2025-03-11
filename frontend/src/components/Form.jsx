@@ -5,6 +5,7 @@ import axios from 'axios';
 const Form = () => {
     const { user } = useAuth(); // Access user from AuthContext
     const userId = user?.id; // Ensure userId is available
+    const isAdmin = user?.role === 'admin'; // Check if the user is an admin
 
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('TEXT');
@@ -15,10 +16,8 @@ const Form = () => {
     const [comments, setComments] = useState([]);
     const [likedPosts, setLikedPosts] = useState(new Set()); // Track liked posts using a Set
 
-    // Reference for the file input
     const fileInputRef = useRef(null);
 
-    // Fetch all forum posts and user's liked posts on component mount
     useEffect(() => {
         fetchPosts();
         if (userId) {
@@ -26,14 +25,12 @@ const Form = () => {
         }
     }, [userId]);
 
-    // Fetch comments for the selected post when it changes
     useEffect(() => {
         if (selectedPostId) {
             fetchComments(selectedPostId);
         }
     }, [selectedPostId]);
 
-    // Fetch all forum posts
     const fetchPosts = async () => {
         try {
             const response = await axios.get('api/forum/forum/posts');
@@ -43,20 +40,18 @@ const Form = () => {
         }
     };
 
-    // Fetch user's liked posts
     const fetchUserLikedPosts = async (userId) => {
         try {
             const response = await axios.get(`/api/likes/user/${userId}/likes`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             const likedPostIds = response.data.map((like) => like.postId);
-            setLikedPosts(new Set(likedPostIds)); // Store liked post IDs in a Set
+            setLikedPosts(new Set(likedPostIds));
         } catch (error) {
             console.error('Failed to fetch liked posts:', error);
         }
     };
 
-    // Fetch comments for a specific post
     const fetchComments = async (postId) => {
         try {
             const response = await axios.get(`/api/comments/post/${postId}/comments`);
@@ -72,6 +67,22 @@ const Form = () => {
             console.error('User not logged in');
             return;
         }
+
+        // Validate file input for ZIP category
+        if (category === 'ZIP' && fileInputRef.current?.files.length === 0) {
+            alert('Please upload a ZIP file.');
+            return;
+        }
+
+        // Validate file type for ZIP category
+        if (category === 'ZIP' && fileInputRef.current?.files.length > 0) {
+            const file = fileInputRef.current.files[0];
+            if (file.type !== 'application/zip' && file.type !== 'application/x-zip-compressed') {
+                alert('Please upload a valid ZIP file.');
+                return;
+            }
+        }
+
         try {
             const formData = new FormData();
             formData.append('title', title);
@@ -79,28 +90,38 @@ const Form = () => {
             formData.append('text', text);
             formData.append('userId', userId);
 
+            // Append the file only if it exists and matches the category
             if ((category === 'IMAGE' || category === 'ZIP') && fileInputRef.current?.files.length > 0) {
                 formData.append('file', fileInputRef.current.files[0]);
             }
 
+            // Log FormData for debugging
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+
             const response = await axios.post('api/forum/forum/post', formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    'Content-Type': 'multipart/form-data', // Ensure correct content type
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
             });
+
             setPosts((prevPosts) => [...prevPosts, response.data]);
             setTitle('');
             setText('');
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''; // Clear the file input
+            }
+            alert('Post created successfully!');
         } catch (error) {
             console.error('Failed to create post:', error);
+            alert('Failed to create post. Please try again.');
         }
     };
-
     const handleLike = async (postId) => {
         try {
             if (likedPosts.has(postId)) {
-                // If already liked, remove the like
                 await axios.delete('api/likes/like', {
                     data: { userId, postId },
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -111,7 +132,6 @@ const Form = () => {
                     return newLikedPosts;
                 });
             } else {
-                // If not liked, add the like
                 await axios.post('api/likes/like', { userId, postId }, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 });
@@ -119,6 +139,18 @@ const Form = () => {
             }
         } catch (error) {
             console.error('Failed to toggle like:', error);
+        }
+    };
+
+    const handleDeletePost = async (postId) => {
+        try {
+            await axios.delete(`api/forum/forum/post/${postId}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            });
+            setPosts(posts.filter((post) => post.id !== postId)); // Remove deleted post from state
+            alert('Post deleted successfully');
+        } catch (error) {
+            console.error('Failed to delete post:', error);
         }
     };
 
@@ -220,6 +252,15 @@ const Form = () => {
                                 >
                                     View Comments
                                 </button>
+
+                                {isAdmin && ( // Only render delete button if user is an admin
+                                    <button
+                                        className="btn btn-danger btn-sm ml-4"
+                                        onClick={() => handleDeletePost(post.id)}
+                                    >
+                                        Delete Post
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

@@ -11,6 +11,11 @@ import Home from './components/Home';
 import NotFound from "./components/NotFound.jsx";
 import UserProfile from "./components/UserProfile.jsx";
 import Form from "./components/Form.jsx";
+import Appointment from "./components/Appointment.jsx";
+import Resource from "./components/Resource.jsx";
+import AdminUsers from "./components/AdminUsers.jsx";
+import MoodAnalytics from "./components/MoodAnalytics.jsx";
+import AdminAppointment from "./components/AdminAppointment.jsx";
 
 // Protected route component
 const ProtectedRoute = ({ children, requiredRole = null }) => {
@@ -65,24 +70,57 @@ const App = () => {
                                 </ProtectedRoute>
                             }
                         />
+                        <Route
+                            path="/resources"
+                            element={
+                                <ProtectedRoute>
+                                    <Resource />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/appointment"
+                            element={
+                                <ProtectedRoute>
+                                    <Appointment />
+                                </ProtectedRoute>
+                            }
+                        />
 
-                        {/*/!* Protected routes for admin users *!/*/}
-                        {/*<Route*/}
-                        {/*    path="/admin/users"*/}
-                        {/*    element={*/}
-                        {/*        <ProtectedRoute requiredRole="admin">*/}
-                        {/*            <AdminUsers />*/}
-                        {/*        </ProtectedRoute>*/}
-                        {/*    }*/}
-                        {/*/>*/}
-                        {/*<Route*/}
-                        {/*    path="/admin/analytics"*/}
-                        {/*    element={*/}
-                        {/*        <ProtectedRoute requiredRole="admin">*/}
-                        {/*            <AdminAnalytics />*/}
-                        {/*        </ProtectedRoute>*/}
-                        {/*    }*/}
-                        {/*/>*/}
+
+                        {/* Protected routes for admin users */}
+                        <Route
+                            path="/users"
+                            element={
+                                <ProtectedRoute requiredRole="admin">
+                                    <AdminUsers />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/analytics"
+                            element={
+                                <ProtectedRoute requiredRole="admin">
+                                    <MoodAnalytics />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/form"
+                            element={
+                                <ProtectedRoute requiredRole="admin">
+                                    <Form />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/appointments"
+                            element={
+                                <ProtectedRoute requiredRole="admin">
+                                    <AdminAppointment />
+                                </ProtectedRoute>
+                            }
+                        />
 
                         {/*/!* 404 route *!/*/}
                         <Route path="*" element={<NotFound />} />

@@ -48,4 +48,33 @@ const getUserMoods = async (req, res) => {
     }
 };
 
-module.exports = { createMood, getUserMoods };
+const getAllMoods = async (req, res) => {
+    try {
+        // Check if the user has access to view all moods (admin only)
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: "Access denied" });
+        }
+
+        // Fetch all moods with the associated user name
+        const moods = await prisma.mood.findMany({
+            include: {
+                user: {
+                    select: {
+                        name: true, // Include the name field from the User model
+                    },
+                },
+            },
+        });
+
+        if (moods.length === 0) {
+            return res.status(200).json([]); // Return an empty array if no moods are found
+        }
+
+        // Return the moods along with user names
+        res.status(200).json(moods);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch all moods', details: error.message });
+    }
+};
+
+module.exports = { createMood, getUserMoods ,getAllMoods };

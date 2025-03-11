@@ -8,6 +8,8 @@ const forumPostRoutes = require('./routes/forumRoutes');
 const moodRoutes = require('./routes/moodRoutes');
 const likeRoutes = require('./routes/likesRoutes');
 const commentRoutes = require('./routes/commentRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+
 // Initialize Express app
 const app = express();
 
@@ -26,6 +28,9 @@ app.use('/api/forum', forumPostRoutes); // Forum post routes
 app.use('/api/moods', moodRoutes); // Mood routes
 app.use('/api/likes', likeRoutes); // Like routes
 app.use('/api/comments', commentRoutes);
+app.use('/api/appointments', appointmentRoutes);
+
+
 // File download route
 app.get('/api/download/uploads/:filename', (req, res) => {
     const { filename } = req.params;

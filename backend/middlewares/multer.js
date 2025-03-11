@@ -17,8 +17,21 @@ const storage = multer.diskStorage({
 
 // File filter (for restricting file types)
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf', 'application/zip'];
-    if (allowedTypes.includes(file.mimetype)) {
+    // Extended mimetype list to handle various ZIP formats
+    const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/jpg',
+        'application/pdf',
+        'application/zip',
+        'application/x-zip',
+        'application/x-zip-compressed',
+        'application/octet-stream'  // Some systems use this for ZIP files
+    ];
+
+    // Check if it's a ZIP file based on extension as a fallback
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext === '.zip' || allowedTypes.includes(file.mimetype)) {
         cb(null, true); // Accept the file
     } else {
         cb(new Error('Invalid file type. Allowed types are: image, pdf, zip'), false); // Reject the file
