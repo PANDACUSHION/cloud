@@ -39,7 +39,11 @@ const createForumPost = async (req, res) => {
 const getForumPosts = async (req, res) => {
     console.log("am here");
     try {
-        const posts = await prisma.forumPost.findMany();
+        const posts = await prisma.forumPost.findMany({
+            orderBy: {
+                timestamp: "desc", // Sorts posts by newest first
+            },
+        });
         res.status(200).json(posts);
         console.log(posts);
     } catch (error) {

@@ -31,6 +31,7 @@ const UserProfile = () => {
                 });
                 setPosts(postsResponse.data);
 
+                //
                 const appointmentsResponse = await axios.get(`/api/users/user/${id}/appointments`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
@@ -304,7 +305,6 @@ const UserProfile = () => {
                         </div>
                     </div>
                 )}
-
                 {/* Activity Tab (Likes & Comments) */}
                 {activeTab === 'activity' && (
                     <div className="grid grid-cols-1 gap-6">
@@ -312,27 +312,32 @@ const UserProfile = () => {
                             <div className="card-body">
                                 <h2 className="card-title">Recent Activity</h2>
 
+                                {/* Likes Section */}
                                 <div className="divider">Likes ({likes.length})</div>
                                 {likes.length > 0 ? (
                                     <div className="overflow-x-auto">
                                         <table className="table table-compact w-full">
                                             <thead>
                                             <tr>
-                                                <th>Post ID</th>
+                                                <th>Post Title</th>
                                                 <th>Timestamp</th>
                                                 <th>Action</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {likes.map(like => (
-                                                <tr key={like.id}>
-                                                    <td>{like.postId}</td>
-                                                    <td>{formatDate(like.timestamp)}</td>
-                                                    <td>
-                                                        <button className="btn btn-xs btn-ghost">View Post</button>
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                            {likes.map(like => {
+                                                // Find the post associated with the like
+                                                const post = posts.find(p => p.id === like.postId);
+                                                return (
+                                                    <tr key={like.id}>
+                                                        <td>{post ? post.title : `Post #${like.postId}`}</td>
+                                                        <td>{formatDate(like.timestamp)}</td>
+                                                        <td>
+                                                            <span className="badge badge-success">Liked</span>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
                                             </tbody>
                                         </table>
                                     </div>
@@ -340,16 +345,30 @@ const UserProfile = () => {
                                     <p className="text-center py-4">No likes yet</p>
                                 )}
 
+                                {/* Comments Section */}
                                 <div className="divider">Comments ({comments.length})</div>
-                                {comments.length > 0 ? comments.map(comment => (
-                                    <div key={comment.id} className="chat chat-start">
-                                        <div className="chat-header">
-                                            {formatDate(comment.timestamp)}
-                                            <span className="ml-2 text-xs opacity-70">Post #{comment.postId}</span>
+                                {comments.length > 0 ? comments.map(comment => {
+                                    // Find the post associated with the comment
+                                    const post = posts.find(p => p.id === comment.postId);
+                                    return (
+                                        <div key={comment.id} className="card bg-base-100 shadow-sm mb-4">
+                                            <div className="card-body">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <h3 className="font-bold">
+                                                            {post ? `Post: ${post.title}` : `Post #${comment.postId}`}
+                                                        </h3>
+                                                        <p className="text-sm opacity-70">{formatDate(comment.timestamp)}</p>
+                                                    </div>
+                                                    <span className="badge badge-info">Commented</span>
+                                                </div>
+                                                <div className="mt-4 bg-base-200 p-4 rounded-lg">
+                                                    <p className="italic">"{comment.text}"</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="chat-bubble">{comment.text}</div>
-                                    </div>
-                                )) : (
+                                    );
+                                }) : (
                                     <p className="text-center py-4">No comments yet</p>
                                 )}
                             </div>
