@@ -1,5 +1,8 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const path = require('path');
+const fs = require('fs');
+
 
 // Create a ForumPost
 const createForumPost = async (req, res) => {
@@ -108,10 +111,83 @@ const deleteForumPost = async (req, res) => {
 };
 
 
+// Download a resource by post ID
+const downloadResource = async (req, res) => {
+    const { postId } = req.params;
+
+    try {
+        // Find the post with the given ID
+        const post = await prisma.forumPost.findUnique({
+            where: { id: postId },
+        });
+
+        // If no post exists or it doesn't have a file
+        if (!post) {
+            return res.status(404).json({ error: 'Resource not found' });
+        }
+
+        if (!post.fileDest) {
+            return res.status(400).json({ error: 'No file associated with this resource' });
+        }
+
+        // Get the file path
+        const filePath = post.fileDest;
+
+        // Check if file exists
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'File not found on server' });
+        }
+
+        // Get filename from path
+        const fileName = path.basename(filePath);
+
+        // Set appropriate headers based on file type
+        if (post.category === 'IMAGE') {
+            // For images, you might want to display them in browser
+            const contentType = getContentTypeFromFilename(fileName);
+            res.setHeader('Content-Type', contentType);
+        } else {
+            // For other files like ZIP, set download headers
+            res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        }
+
+        // Stream the file to response
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.pipe(res);
+
+    } catch (error) {
+        res.status(500).json({
+            error: 'Failed to download resource',
+            details: error.message
+        });
+    }
+};
+
+// Helper function to determine content type from filename
+function getContentTypeFromFilename(filename) {
+    const ext = path.extname(filename).toLowerCase();
+
+    const contentTypes = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.svg': 'image/svg+xml',
+        '.zip': 'application/zip',
+        '.pdf': 'application/pdf',
+        // Add more as needed
+    };
+
+    return contentTypes[ext] || 'application/octet-stream'; // Default to binary stream
+}
+
+
 module.exports = {
     createForumPost,
     getForumPosts,
     getForumPostById,
     getResources,
-    deleteForumPost
+    deleteForumPost,
+    downloadResource
 };

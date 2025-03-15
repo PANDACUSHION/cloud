@@ -1,5 +1,5 @@
 const express = require('express');
-const { createForumPost, getForumPosts, getForumPostById , getResources ,deleteForumPost} = require('../controllers/forumController');
+const { createForumPost, getForumPosts, getForumPostById , getResources ,deleteForumPost, downloadResource} = require('../controllers/forumController');
 const { authenticate, authorizeAdmin } = require('../middlewares/auth');
 const upload = require('../middlewares/multer'); // Multer middleware for file uploads
 
@@ -17,5 +17,7 @@ router.get('/forum/post/:postId', getForumPostById);
 router.get('/forum/resources', getResources);
 
 router.delete('/forum/post/:postId', authenticate, authorizeAdmin, deleteForumPost);
+
+router.get('/resources/:postId/download', downloadResource);
 
 module.exports = router;
