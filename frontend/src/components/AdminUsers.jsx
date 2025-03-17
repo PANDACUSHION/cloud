@@ -78,31 +78,31 @@ const AdminUsers = () => {
     const getRoleBadgeColor = (role) => {
         switch(role.toLowerCase()) {
             case 'admin':
-                return 'badge-primary';
+                return 'bg-indigo-100 text-indigo-800';
             case 'moderator':
-                return 'badge-secondary';
+                return 'bg-purple-100 text-purple-800';
             case 'editor':
-                return 'badge-accent';
+                return 'bg-green-100 text-green-800';
             default:
-                return 'badge-ghost';
+                return 'bg-gray-100 text-gray-800';
         }
     };
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center min-h-screen">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
+            <div className="flex justify-center items-center min-h-screen bg-gray-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="bg-base-200 min-h-screen p-4">
-            <div className="bg-base-100 rounded-box shadow-xl p-6 max-w-6xl mx-auto">
+        <div className="bg-gray-50 min-h-screen p-4">
+            <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 max-w-6xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold text-primary">Admin Dashboard</h1>
+                    <h1 className="text-2xl font-bold text-indigo-700">User Management</h1>
                     <button
-                        className="btn btn-outline btn-sm"
+                        className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700 text-sm font-medium transition-colors duration-200"
                         onClick={fetchUsers}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
@@ -113,45 +113,69 @@ const AdminUsers = () => {
                 </div>
 
                 {error && (
-                    <div className="alert alert-error mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <span>{error}</span>
+                    <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md mb-4">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm text-red-700">{error}</p>
+                            </div>
+                        </div>
                     </div>
                 )}
 
                 {users && users.length > 0 ? (
                     <div className="overflow-x-auto">
-                        <table className="table table-zebra w-full">
-                            <thead>
-                            <tr className="bg-base-300">
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th className="text-right">Actions</th>
+                        <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead className="bg-gray-50">
+                            <tr>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    ID
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Name
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Email
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Role
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
                             </tr>
                             </thead>
-                            <tbody>
-                            {users.map(user => (
-                                <tr key={user.id} className="hover">
-                                    <td className="font-mono">{user.id}</td>
-                                    <td>{user.name}</td>
-                                    <td>{user.email}</td>
-                                    <td>
-                                        <div className={`badge ${getRoleBadgeColor(user.role)}`}>
-                                            {user.role}
-                                        </div>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                            {users.map((user, index) => (
+                                <tr key={user.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                    <td className="px-6 py-4 whitespace-nowrap font-mono text-sm text-gray-500">
+                                        {user.id}
                                     </td>
-                                    <td className="text-right">
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm text-gray-700">{user.email}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
+                                                {user.role}
+                                            </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div className="flex justify-end gap-2">
                                             <button
-                                                className="btn btn-sm btn-outline btn-info"
+                                                className="px-3 py-1 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors duration-200"
                                                 onClick={() => navigate(`/users/edit/${user.id}`)}
                                             >
                                                 Edit
                                             </button>
                                             <button
-                                                className="btn btn-sm btn-outline btn-error"
+                                                className="px-3 py-1 bg-red-50 text-red-700 rounded-md hover:bg-red-100 transition-colors duration-200"
                                                 onClick={() => confirmDelete(user)}
                                             >
                                                 Delete
@@ -164,25 +188,39 @@ const AdminUsers = () => {
                         </table>
                     </div>
                 ) : (
-                    <div className="alert">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span>No users found.</span>
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                        <p className="mt-2 text-lg font-medium text-gray-600">No users found</p>
+                        <p className="mt-1 text-gray-500">Create a new user to get started</p>
                     </div>
                 )}
             </div>
 
             {/* Delete Confirmation Modal */}
             {showDeleteModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="modal-box">
-                        <h3 className="font-bold text-lg">Confirm Deletion</h3>
-                        <p className="py-4">
-                            Are you sure you want to delete user <span className="font-semibold">{userToDelete?.name}</span> with email <span className="font-semibold">{userToDelete?.email}</span>?
+                <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">Confirm Deletion</h3>
+                        <p className="text-gray-700 mb-2">
+                            Are you sure you want to delete user <span className="font-semibold">{userToDelete?.name}</span>?
                         </p>
-                        <p className="text-error text-sm mb-4">This action cannot be undone.</p>
-                        <div className="modal-action">
-                            <button className="btn" onClick={cancelDelete}>Cancel</button>
-                            <button className="btn btn-error" onClick={handleDeleteUser}>Delete User</button>
+                        <p className="text-gray-600 text-sm mb-2">Email: <span className="font-semibold">{userToDelete?.email}</span></p>
+                        <p className="text-red-600 text-sm mb-6">This action cannot be undone.</p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium transition-colors duration-200"
+                                onClick={cancelDelete}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium transition-colors duration-200"
+                                onClick={handleDeleteUser}
+                            >
+                                Delete User
+                            </button>
                         </div>
                     </div>
                 </div>

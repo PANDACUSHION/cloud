@@ -63,14 +63,6 @@ const App = () => {
                             }
                         />
                         <Route
-                            path="/form"
-                            element={
-                                <ProtectedRoute>
-                                    <Form />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
                             path="/resources"
                             element={
                                 <ProtectedRoute>
@@ -87,6 +79,15 @@ const App = () => {
                             }
                         />
 
+                        {/* Form route with role-based access */}
+                        <Route
+                            path="/form"
+                            element={
+                                <ProtectedRoute requiredRole={null}>
+                                    <Form />
+                                </ProtectedRoute>
+                            }
+                        />
 
                         {/* Protected routes for admin users */}
                         <Route
@@ -102,14 +103,6 @@ const App = () => {
                             element={
                                 <ProtectedRoute requiredRole="admin">
                                     <MoodAnalytics />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/form"
-                            element={
-                                <ProtectedRoute requiredRole="admin">
-                                    <Form />
                                 </ProtectedRoute>
                             }
                         />

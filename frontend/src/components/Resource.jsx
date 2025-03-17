@@ -6,10 +6,10 @@ const Resource = () => {
     const [selectedResource, setSelectedResource] = useState(null);
 
     useEffect(() => {
-        resourcesData ();
+        resourcesData();
     }, []);
 
-    const resourcesData  = async () => {
+    const resourcesData = async () => {
         try {
             const response = await axios.get('/api/forum/forum/resources');
             setResources(response.data);
@@ -18,6 +18,29 @@ const Resource = () => {
             }
         } catch (error) {
             console.error('Failed to fetch resources:', error);
+        }
+    };
+
+    // Handle resource download
+    const downloadResource = (resourceId, e) => {
+        e.stopPropagation(); // Prevent row selection when clicking download
+        window.location.href = `/api/forum/resources/${resourceId}/download`;
+    };
+
+    // Handle resource deletion
+    const deleteResource = async (resourceId, e) => {
+        e.stopPropagation(); // Prevent row selection when clicking delete
+
+        if (window.confirm('Are you sure you want to delete this resource?')) {
+            try {
+                await axios.delete(`/api/forum/forum/${resourceId}`);
+                resourcesData(); // Refresh the resources list
+                if (selectedResource && selectedResource.id === resourceId) {
+                    setSelectedResource(resources.length > 1 ? resources[0] : null);
+                }
+            } catch (error) {
+                console.error('Failed to delete resource:', error);
+            }
         }
     };
 
@@ -35,7 +58,8 @@ const Resource = () => {
 
     // Get file name from path
     const getFileName = (path) => {
-        return path.split('\\').pop();
+        if (!path) return 'No file';
+        return path.split('\\').pop().split('/').pop();
     };
 
     // Get appropriate icon based on category
@@ -45,6 +69,12 @@ const Resource = () => {
                 return (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                );
+            case 'ZIP':
+                return (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                     </svg>
                 );
             default:
@@ -84,8 +114,8 @@ const Resource = () => {
                         <select className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
                             <option>All Categories</option>
                             <option>IMAGE</option>
+                            <option>ZIP</option>
                             <option>DOCUMENT</option>
-                            <option>VIDEO</option>
                         </select>
 
                         <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -103,7 +133,7 @@ const Resource = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        Image Resources
+                        Resources ({resources.length})
                     </h2>
 
                     {/* Table */}
@@ -165,7 +195,7 @@ const Resource = () => {
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                             </svg>
-                                            {getFileName(resource.fileDest)}
+                                            {resource.fileDest ? getFileName(resource.fileDest) : 'No file'}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -175,7 +205,7 @@ const Resource = () => {
                                             </button>
                                             <button
                                                 className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                                onClick={() => window.open(selectedResource.fileDest, '_blank')}
+                                                onClick={(e) => downloadResource(resource.id, e)}
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v12m-4-4l4 4 4-4m-8 8h8" />
@@ -223,8 +253,8 @@ const Resource = () => {
                             <div>
                                 <h4 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">File Information</h4>
                                 <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium text-gray-500">File:</span> <span className="text-gray-900">{getFileName(selectedResource.fileDest)}</span></p>
-                                    <p className="text-sm"><span className="font-medium text-gray-500">Location:</span> <span className="text-gray-900">{selectedResource.fileDest}</span></p>
+                                    <p className="text-sm"><span className="font-medium text-gray-500">File:</span> <span className="text-gray-900">{selectedResource.fileDest ? getFileName(selectedResource.fileDest) : 'No file'}</span></p>
+                                    <p className="text-sm"><span className="font-medium text-gray-500">Location:</span> <span className="text-gray-900">{selectedResource.fileDest || 'N/A'}</span></p>
                                     <p className="text-sm"><span className="font-medium text-gray-500">Description:</span> <span className="text-gray-900">{selectedResource.text}</span></p>
                                 </div>
                             </div>
@@ -243,13 +273,19 @@ const Resource = () => {
                                 </svg>
                                 Edit
                             </button>
-                            <button className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <button
+                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                onClick={(e) => downloadResource(selectedResource.id, e)}
+                            >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
                                 Download
                             </button>
-                            <button className="inline-flex items-center px-3 py-2 border border-red-300 text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            <button
+                                className="inline-flex items-center px-3 py-2 border border-red-300 text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                onClick={(e) => deleteResource(selectedResource.id, e)}
+                            >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
