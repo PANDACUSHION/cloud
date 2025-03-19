@@ -567,7 +567,8 @@ const Form = () => {
                                             </button>
                                         </div>
 
-                                        {(isAdmin || userId === post.userId) && (
+                                        {/* Only show delete button if user is admin */}
+                                        {isAdmin && (
                                             <button
                                                 className="btn btn-error btn-outline gap-2"
                                                 onClick={() => handleDeletePost(post.id)}
