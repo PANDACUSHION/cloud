@@ -23,7 +23,7 @@ const Login = () => {
             if (response.status === 200) {
                 const token = response.data.token;
                 localStorage.setItem("token", token);
-                navigate("/dashboard");
+                window.location.href = "/dashboard";
             }
         } catch (err) {
             setError(err.response?.data?.message || "Failed to login");

@@ -16,18 +16,36 @@ import Resource from "./components/Resource.jsx";
 import AdminUsers from "./components/AdminUsers.jsx";
 import MoodAnalytics from "./components/MoodAnalytics.jsx";
 import AdminAppointment from "./components/AdminAppointment.jsx";
+import { jwtDecode } from 'jwt-decode';
 
 // Protected route component
 const ProtectedRoute = ({ children, requiredRole = null }) => {
     const { user } = useAuth();
+    const isAuthenticated = !!user || !!localStorage.getItem('token');
 
-    // Not logged in
-    if (!user) {
+    // Check for both user state and token in localStorage
+    if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
 
+    // If there's a token but no user state, we should refresh the user state
+    // This handles cases where the app might have reloaded but token exists
+    if (!user && localStorage.getItem('token')) {
+        try {
+            const token = localStorage.getItem('token');
+            const decodedUser = jwtDecode(token);
+            // You might need to wrap this in a useEffect if using directly in a component
+            // For now, redirect to dashboard since they are authenticated
+            return <Navigate to="/dashboard" replace />;
+        } catch (error) {
+            // Invalid token
+            localStorage.removeItem('token');
+            return <Navigate to="/login" replace />;
+        }
+    }
+
     // Role required but user doesn't have it
-    if (requiredRole && user.role !== requiredRole) {
+    if (requiredRole && user && user.role !== requiredRole) {
         return <Navigate to="/dashboard" replace />;
     }
 
